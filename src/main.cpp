@@ -22,34 +22,50 @@ const int servo_incl_Pin = 32; // Broche GPIO pour le servo d'inclinaison
 const int servo_dir_Pin = 33;  // Broche GPIO pour le servo directionnel
 
 void handleIRSignal(uint32_t code) {
-    if (code == Tableau[13]) { // Touche 2
-        Serial.println("Touche 2 appuyée : Servo inclinaison tourne de 0° à 180°");
-        for (int angle = 0; angle <= 180; angle++) {
-            Servo_inclinaison.write(angle);
-            delay(15);
+    static int angle_inclinaison = 0; // Position actuelle du servo inclinaison
+    static int angle_direction = 0;  // Position actuelle du servo directionnel
+
+    if (code == Tableau[13]) { // Touche 2 : inclinaison +15°
+        if (angle_inclinaison <= 170) { // Empêche de dépasser 180°
+            angle_inclinaison += 10;
+            Servo_inclinaison.write(angle_inclinaison);
+            Serial.print("Inclinaison augmentée à : ");
+            Serial.println(angle_inclinaison);
+        } else {
+            Serial.println("Inclinaison déjà au maximum (180°).");
         }
-    } else if (code == Tableau[15]) { // Touche 4
-        Serial.println("Touche 4 appuyée : Servo inclinaison tourne de 0° à 180°");
-        for (int angle = 0; angle <= 180; angle++) {
-            Servo_dir.write(angle);
-            delay(15);
+    } else if (code == Tableau[15]) { // Touche 4 : direction +15°
+        if (angle_direction <= 170) { // Empêche de dépasser 180°
+            angle_direction += 10;
+            Servo_dir.write(angle_direction);
+            Serial.print("Direction augmentée à : ");
+            Serial.println(angle_direction);
+        } else {
+            Serial.println("Direction déjà au maximum (180°).");
         }
-    } else if (code == Tableau[17]) { // Touche 2
-        Serial.println("Touche 6 appuyée : Servo directionnel tourne de 180° à 0°");
-        for (int angle = 180; angle >= 0; angle--) {
-            Servo_dir.write(angle);
-            delay(15);
+    } else if (code == Tableau[17]) { // Touche 6 : direction -15°
+        if (angle_direction >= 10) { // Empêche de descendre sous 0°
+            angle_direction -= 10;
+            Servo_dir.write(angle_direction);
+            Serial.print("Direction diminuée à : ");
+            Serial.println(angle_direction);
+        } else {
+            Serial.println("Direction déjà au minimum (0°).");
         }
-    } else if (code == Tableau[19]) { // Touche 2
-        Serial.println("Touche 8 appuyée : Servo directionnel tourne de 180° à 0°");
-        for (int angle = 180; angle >= 0; angle--) {
-            Servo_inclinaison.write(angle);
-            delay(15);
+    } else if (code == Tableau[19]) { // Touche 8 : inclinaison -15°
+        if (angle_inclinaison >= 10) { // Empêche de descendre sous 0°
+            angle_inclinaison -= 10;
+            Servo_inclinaison.write(angle_inclinaison);
+            Serial.print("Inclinaison diminuée à : ");
+            Serial.println(angle_inclinaison);
+        } else {
+            Serial.println("Inclinaison déjà au minimum (0°).");
         }
     } else {
         Serial.println("Code non mappé ou inutilisé.");
     }
 }
+
 
 void setup() {
     Serial.begin(115200);
